@@ -13,8 +13,15 @@ import org.springframework.stereotype.Service
 class ProductCommentService(
         val productCommentRepository: ProductCommentRepository
 ) {
-    fun findProductCommentsPage(productId: Long, productCommentSearchVO: ProductCommentSearchVO): List<ProductCommentDetailVO> {
-        return productCommentRepository.findAllByProductIdAndPageOffset(productId, productCommentSearchVO)
+    fun findById(commentId: Long): ProductComment {
+        return productCommentRepository.findLatestById(commentId)
+                ?: throw NotFoundSourceException("commentId: $commentId 에 해당하는 코멘트를 찾을 수 없습니다.")
+    }
+
+    fun findProductCommentsPage(productId: Long,
+                                memberId: Long,
+                                productCommentSearchVO: ProductCommentSearchVO): List<ProductCommentDetailVO> {
+        return productCommentRepository.findAllByProductIdAndPageOffset(productId, memberId, productCommentSearchVO)
     }
 
     fun write(productId: Long, memberId: Long, content: String): ProductComment {

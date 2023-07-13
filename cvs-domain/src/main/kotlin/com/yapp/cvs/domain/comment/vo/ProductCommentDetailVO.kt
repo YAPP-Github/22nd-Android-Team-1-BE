@@ -6,12 +6,12 @@ import java.time.LocalDateTime
 data class ProductCommentDetailVO(
         val productCommentId: Long,
         val content: String,
-        val commentLikeCount: Long,
         val createdAt: LocalDateTime,
-        val likeType: ProductLikeType ?= ProductLikeType.NONE,
+        val likeType: ProductLikeType,
+        var commentLikeCount: Long,
         val productId: Long,
-
         val memberId: Long,
         val nickname: String,
-        var isOwner: Boolean = false
+        val liked: Boolean,
+        val isOwner: Boolean,
 )

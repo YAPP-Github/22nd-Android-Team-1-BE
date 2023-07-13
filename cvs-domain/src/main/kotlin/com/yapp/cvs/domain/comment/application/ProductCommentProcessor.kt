@@ -15,12 +15,18 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 @Transactional
 class ProductCommentProcessor(
-        private val productCommentService: ProductCommentService
+        private val productCommentService: ProductCommentService,
+        private val productCommentLikeSummaryService: ProductCommentLikeSummaryService
 ) {
-    fun getCommentDetails(productId: Long, memberId: Long, productCommentSearchVO: ProductCommentSearchVO): OffsetPageVO<ProductCommentDetailVO> {
-        val result = productCommentService.findProductCommentsPage(productId, productCommentSearchVO)
-        result.filter { it.memberId == memberId }
-                .forEach { it.isOwner = true }
+    fun getComment(commentId: Long): ProductCommentVO {
+        return ProductCommentVO.from(productCommentService.findById(commentId))
+    }
+
+    fun getCommentDetails(productId: Long,
+                          memberId: Long,
+                          productCommentSearchVO: ProductCommentSearchVO): OffsetPageVO<ProductCommentDetailVO> {
+        val result = productCommentService.findProductCommentsPage(productId, memberId, productCommentSearchVO)
+        result.forEach { it.commentLikeCount = productCommentLikeSummaryService.getCommentLikeCount(it.productId, it.memberId) }
         return OffsetPageVO(result.lastOrNull()?.productCommentId, result)
     }
 

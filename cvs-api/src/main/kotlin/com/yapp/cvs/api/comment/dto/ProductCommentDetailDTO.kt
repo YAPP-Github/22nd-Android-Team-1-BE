@@ -11,6 +11,7 @@ data class ProductCommentDetailDTO(
         val isOwner: Boolean,
         val createdAt: LocalDateTime,
         val likeType: ProductLikeType,
+        val liked: Boolean,
 
         val memberId: Long,
         val nickname: String,
@@ -25,7 +26,8 @@ data class ProductCommentDetailDTO(
                     commentLikeCount = productCommentDetailVO.commentLikeCount,
                     isOwner = productCommentDetailVO.isOwner,
                     createdAt = productCommentDetailVO.createdAt,
-                    likeType = productCommentDetailVO.likeType ?: ProductLikeType.NONE,
+                    likeType = productCommentDetailVO.likeType,
+                    liked = productCommentDetailVO.liked,
                     memberId = productCommentDetailVO.memberId,
                     nickname = productCommentDetailVO.nickname,
                     productId = productCommentDetailVO.productId

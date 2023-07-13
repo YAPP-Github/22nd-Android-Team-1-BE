@@ -6,12 +6,12 @@ import com.yapp.cvs.domain.comment.vo.ProductCommentSearchVO
 import org.springframework.data.jpa.repository.JpaRepository
 
 interface ProductCommentRepository : JpaRepository<ProductComment, Long>, ProductCommentCustom {
-    fun findByProductIdAndMemberIdAndValidTrue(productId: Long, memberId: Long): ProductComment?
+
     fun existsByProductIdAndMemberIdAndValidTrue(productId: Long, memberId: Long): Boolean
-    fun deleteByProductIdAndMemberId(productId: Long, memberId: Long)
 }
 
 interface ProductCommentCustom {
+    fun findLatestById(commentId: Long): ProductComment?
     fun findLatestByProductIdAndMemberId(productId: Long, memberId: Long): ProductComment?
-    fun findAllByProductIdAndPageOffset(productId: Long, productCommentSearchVO: ProductCommentSearchVO): List<ProductCommentDetailVO>
+    fun findAllByProductIdAndPageOffset(productId: Long, memberId: Long, productCommentSearchVO: ProductCommentSearchVO): List<ProductCommentDetailVO>
 }

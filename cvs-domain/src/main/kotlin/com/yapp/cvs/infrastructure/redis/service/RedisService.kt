@@ -15,6 +15,8 @@ interface RedisService {
     fun <T> expire(key: RedisKey, duration: Duration)
     fun <T> expire(key: RedisKey, instant: Instant)
     fun getAtomicLong(key: RedisKey): Long
+    fun getAtomicLongOrNull(key: RedisKey): Long?
+    fun setAtomicLong(key: RedisKey, value: Long)
     fun increment(key: RedisKey): Long
     fun decrement(key: RedisKey): Long
 }

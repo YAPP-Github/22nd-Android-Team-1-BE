@@ -1,5 +1,6 @@
 package com.yapp.cvs.infrastructure.redis.service
 
+import com.yapp.cvs.domain.extension.ifTrue
 import com.yapp.cvs.infrastructure.redis.RedisKey
 import org.redisson.api.RBatch
 import org.redisson.api.RBucket
@@ -55,6 +56,14 @@ class RedissonRedisService(
 
     override fun getAtomicLong(key: RedisKey): Long {
         return redissonClient.getAtomicLong(key.value).get()
+    }
+
+     override fun getAtomicLongOrNull(key: RedisKey): Long? {
+        return redissonClient.getAtomicLong(key.value).takeIf { it.isExists } ?.get()
+    }
+
+    override fun setAtomicLong(key: RedisKey, value: Long) {
+        redissonClient.getAtomicLong(key.value).set(value)
     }
 
     override fun increment(key: RedisKey): Long {
