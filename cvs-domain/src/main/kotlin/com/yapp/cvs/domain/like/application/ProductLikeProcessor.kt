@@ -60,7 +60,7 @@ class ProductLikeProcessor(
     fun dislikeProduct(productLikeRequestVO: ProductLikeRequestVO): ProductScoreVO {
         val memberProductLikeMapping = memberProductLikeMappingService
             .findByMemberProductLike(productLikeRequestVO.memberProductMappingKey)
-            ?.also { if(it.likeType.isLike()) throw BadRequestException("이미 싫어요 한 상품입니다.") }
+            ?.also { if(it.likeType.isDisLike()) throw BadRequestException("이미 싫어요 한 상품입니다.") }
             ?.apply { likeType = ProductLikeType.DISLIKE }
             ?: MemberProductLikeMapping.dislike(productLikeRequestVO.memberProductMappingKey)
 

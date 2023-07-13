@@ -6,4 +6,5 @@ data class ProductCommentSearchVO(
         val pageSize: Long,
         val offsetProductCommentId: Long?,
         val orderBy: ProductCommentOrderType,
+        val productId: Long?
 )

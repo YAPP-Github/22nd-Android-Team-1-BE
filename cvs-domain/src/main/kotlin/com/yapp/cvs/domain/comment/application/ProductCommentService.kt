@@ -2,7 +2,6 @@ package com.yapp.cvs.domain.comment.application
 
 import com.yapp.cvs.domain.comment.entity.ProductComment
 import com.yapp.cvs.domain.comment.repository.ProductCommentRepository
-import com.yapp.cvs.domain.comment.vo.ProductCommentDetailVO
 import com.yapp.cvs.domain.comment.vo.ProductCommentSearchVO
 import com.yapp.cvs.domain.like.entity.MemberProductMappingKey
 import com.yapp.cvs.exception.BadRequestException
@@ -13,20 +12,26 @@ import org.springframework.stereotype.Service
 class ProductCommentService(
         val productCommentRepository: ProductCommentRepository
 ) {
-    fun findProductCommentsPage(productId: Long, productCommentSearchVO: ProductCommentSearchVO): List<ProductCommentDetailVO> {
-        return productCommentRepository.findAllByProductIdAndPageOffset(productId, productCommentSearchVO)
+    fun findProductCommentsPage(productCommentSearchVO: ProductCommentSearchVO): List<ProductComment> {
+        return productCommentRepository.findAllByCondition(productCommentSearchVO)
     }
 
-    fun write(productId: Long, memberId: Long, content: String): ProductComment {
-        validateCommentDuplication(productId, memberId)
-        val comment = ProductComment(productId = productId, memberId = memberId, content = content)
-        return productCommentRepository.save(comment)
+    fun write(memberProductMappingKey: MemberProductMappingKey, content: String): ProductComment {
+        validateCommentDuplication(memberProductMappingKey)
+        return productCommentRepository.save(ProductComment(
+                productId = memberProductMappingKey.productId,
+                memberId = memberProductMappingKey.memberId,
+                content = content
+        ))
     }
 
-    fun update(productId: Long, memberId: Long, content: String): ProductComment {
-        inactivate(MemberProductMappingKey(productId = productId, memberId = memberId))
-        val newComment = ProductComment(productId = productId, memberId = memberId, content = content)
-        return productCommentRepository.save(newComment)
+    fun update(memberProductMappingKey: MemberProductMappingKey, content: String): ProductComment {
+        inactivate(memberProductMappingKey)
+        return productCommentRepository.save(ProductComment(
+                productId = memberProductMappingKey.productId,
+                memberId = memberProductMappingKey.memberId,
+                content = content
+        ))
     }
 
     fun activate(memberProductMappingKey: MemberProductMappingKey) {
@@ -48,9 +53,10 @@ class ProductCommentService(
             ?.apply { if(valid) valid = false }
     }
 
-    private fun validateCommentDuplication(productId: Long, memberId: Long) {
-        if (productCommentRepository.existsByProductIdAndMemberIdAndValidTrue(productId, memberId)) {
-            throw BadRequestException("productId: $productId 에 대한 코멘트가 이미 존재합니다.")
+    private fun validateCommentDuplication(memberProductMappingKey: MemberProductMappingKey) {
+        if (productCommentRepository.existsByProductIdAndMemberIdAndValidTrue(
+                        memberProductMappingKey.productId, memberProductMappingKey.memberId)) {
+            throw BadRequestException("productId: ${memberProductMappingKey.productId} 에 대한 코멘트가 이미 존재합니다.")
         }
     }
 }

@@ -6,6 +6,7 @@ import com.yapp.cvs.api.comment.dto.ProductCommentDetailDTO
 import com.yapp.cvs.api.comment.dto.ProductCommentSearchDTO
 import com.yapp.cvs.api.common.dto.OffsetPageDTO
 import com.yapp.cvs.domain.comment.application.ProductCommentProcessor
+import com.yapp.cvs.domain.comment.vo.ProductCommentRequestVO
 import com.yapp.cvs.domain.like.application.ProductLikeProcessor
 import com.yapp.cvs.domain.like.vo.ProductLikeRequestVO
 import io.swagger.v3.oas.annotations.Operation
@@ -25,32 +26,43 @@ class ProductCommentController(
 ) {
     private val memberId = 1L //TODO : security context 에서 memberId 가져오기
 
+    @GetMapping("/comments")
+    @Operation(summary = "해당 상품에 작성된 평가 코멘트를 최대 10개 가져옵니다.")
+    fun getRecentProductComments(@ParameterObject productCommentSearchDTO: ProductCommentSearchDTO): OffsetPageDTO<ProductCommentDetailDTO> {
+        val requestVO = productCommentSearchDTO.toVO()
+        val result = productCommentProcessor.getCommentDetails(memberId, requestVO)
+        return OffsetPageDTO(result.lastId, result.content.map { ProductCommentDetailDTO.from(it) })
+    }
+
     @GetMapping("/{productId}/comments")
-    @Operation(description = "해당 상품에 작성된 평가 코멘트를 조건만큼 가져옵니다.")
+    @Operation(summary = "해당 상품에 작성된 평가 코멘트를 조건만큼 가져옵니다.")
     fun getProductComments(@PathVariable productId: Long,
                            @ParameterObject productCommentSearchDTO: ProductCommentSearchDTO): OffsetPageDTO<ProductCommentDetailDTO> {
-        val result = productCommentProcessor.getCommentDetails(productId, memberId, productCommentSearchDTO.toVO())
+        val requestVO = productCommentSearchDTO.toVO(productId)
+        val result = productCommentProcessor.getCommentDetails(memberId, requestVO)
         return OffsetPageDTO(result.lastId, result.content.map { ProductCommentDetailDTO.from(it) })
     }
 
     @PostMapping("/{productId}/comment/write")
-    @Operation(description = "상품에 대한 평가 코멘트를 작성합니다.")
+    @Operation(summary = "상품에 대한 평가 코멘트를 작성합니다.")
     fun writeComment(@PathVariable productId: Long,
                      @RequestBody productCommentContentDTO: ProductCommentContentDTO): ProductCommentDTO {
-        val comment = productCommentProcessor.createComment(productId, memberId, productCommentContentDTO.content)
+        val requestVO = ProductCommentRequestVO(productId, memberId)
+        val comment = productCommentProcessor.createComment(requestVO, productCommentContentDTO.content)
         return ProductCommentDTO.from(comment)
     }
 
     @PostMapping("/{productId}/comment/edit")
-    @Operation(description = "상품에 대한 평가 코멘트를 수정합니다.")
+    @Operation(summary = "상품에 대한 평가 코멘트를 수정합니다.")
     fun updateComment(@PathVariable productId: Long,
                       @RequestBody productCommentContentDTO: ProductCommentContentDTO): ProductCommentDTO {
-        val comment = productCommentProcessor.updateComment(productId, memberId, productCommentContentDTO.content)
+        val requestVO = ProductCommentRequestVO(productId, memberId)
+        val comment = productCommentProcessor.updateComment(requestVO, productCommentContentDTO.content)
         return ProductCommentDTO.from(comment)
     }
 
     @PostMapping("/{productId}/comment/delete")
-    @Operation(description = "상품에 대한 평가 코멘트를 삭제합니다.")
+    @Operation(summary = "상품에 대한 평가 코멘트를 삭제합니다.")
     fun deleteComment(@PathVariable productId: Long) {
         productLikeProcessor.cancelEvaluation(ProductLikeRequestVO(productId = productId, memberId = memberId))
     }

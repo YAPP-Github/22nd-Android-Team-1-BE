@@ -7,7 +7,7 @@ import javax.persistence.*
 import kotlin.math.max
 
 @Entity
-@Table(name = "product_like_summarys")
+@Table(name = "product_like_summaries")
 class ProductLikeSummary(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
